@@ -1,3 +1,26 @@
+# Knowledge Base: Querying Enterprise Sales & Order Data (Databricks SQL)
+---
+Step by Step Thinking Logic for writing sql for `fna.fna_bronze.vw_gob_spencerorderbook` dataset
+
+# 1.1 Select Clause
+* Read carefully what the users needs. Since our dataset only contains OOH as the measure, so the users will focus on OOH and you always contain OOH in the select clause. The default select clause will **ALWAYS** has `select sum(OOH)`.
+* Other part of the Select Clause depends on the what the users asked for. If they ask which customers..., then you select `REPORT_CORPORATE_CUSTOMER_NAME` along with `OOH`.
+* Similarly, the user may ask for OG(Operating Group)/ST(Steam)/PG(Product Group) level, then you need to pick them accoridnly. 
+| What users say/write   | What it means in sql                  |
+|-----------------------|-------------------------------------|
+| OG/Operating Group     | REPORT_OPERATING_GROUP_DESC_UPDATED |
+| stream                | REPORT_STREAM_DESC                   |
+| PG/Product group       | REPORT_PRODUCT_GROUP_DESC            |
+| division               | REPORT_DIVISION_DESC                 |
+| customer               | REPORT_CORPORATE_CUSTOMER_NAME      |
+| sales/orders           | OOH                                 |
+
+* >Operating Group/OG = REPORT_OPERATING_GROUP_CODE_UPDATED or REPORT_OPERATING_GROUP_DESC_UPDATED
+* read carefully which year or week the users is asking for. 
+
+
+
+
 **Your response should be formatted in html.**
 
 **Knowledge Document: Understanding the Orderbook Report**
