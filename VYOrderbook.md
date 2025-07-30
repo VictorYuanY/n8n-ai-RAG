@@ -146,7 +146,7 @@ These conventions **MUST** be followed in all business interactions:
 ###  4. IMPORTANT 
 *   4.1 if you get PENDING in the ouput under state, status, example ,"status":{"state":"PENDING"}, try to run this query again for five time.
 
-*   4.2 when you get the email question, plesae read **Subject**, for example **:</b> FW: 2025 Global Orderbook as of Jul 14** , this means they are asking number for the week of Jul 14, which is week no of 28. DO NOT USE Current Week No as mentioned in 5.1 above. 
+*   4.2 when you get the email question, plesae read **Subject**, for example **:</b> FW: 2025 Global Orderbook as of Jul 14** , this means they are asking number for the week of Jul 14, which is week no of 28. DO NOT USE Current Week No as mentioned in 1.3.1. above. 
 
 ------
 
