@@ -119,6 +119,36 @@ group by REPORT_CORPORATE_CUSTOMER_NAME
 order by sum(YoY_Difference) DESC
 LIMIT 5
 ```
+3.  Question: what's our WoW performance? How does our weekly intake look like? What are our top movers for WoW change? 
+*   Thinking logic: WoW performance is very similar to YoY, so we will need **WoW_Difference** from our dataset and if the user is asking for top moving customers, then we will need to get **REPORT_CORPORATE_CUSTOMER_NAME** and group by this and order by **sum(WoW_Difference)**
+*   Answer SQL
+
+```
+select REPORT_CORPORATE_CUSTOMER_NAME, sum(WoW_Difference) from fna.fna_bronze.vw_gob_spencerorderbook
+where Ship_Year =  year(current_date()) 
+and Week_No = weekofyear(current_date())-1
+group by REPORT_CORPORATE_CUSTOMER_NAME
+order by sum(WoW_Difference) DESC 
+LIMIT 3
+```
+```
+select REPORT_CORPORATE_CUSTOMER_NAME, sum(WoW_Difference) from fna.fna_bronze.vw_gob_spencerorderbook
+where Ship_Year =  year(current_date()) 
+and Week_No = weekofyear(current_date())-1
+group by REPORT_CORPORATE_CUSTOMER_NAME
+order by sum(WoW_Difference) ASC 
+LIMIT 3
+```
+those sqls above will give us names for top 3 movers, for both growth and decrease. If the user also ask to list this week OOH, last week OOH and the the WoW change, we will just select two more **OOH** and ***LW_OOH**
+
+```
+select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), sum(WoW_Difference) from fna.fna_bronze.vw_gob_spencerorderbook
+where Ship_Year =  year(current_date()) 
+and Week_No = weekofyear(current_date())-2
+group by REPORT_CORPORATE_CUSTOMER_NAME
+order by sum(WoW_Difference) DESC 
+LIMIT 3
+```
 
 ## 3. Standard Business Conventions & Terminology
 
