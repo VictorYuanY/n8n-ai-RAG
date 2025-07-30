@@ -136,7 +136,7 @@ These conventions **MUST** be followed in all business interactions:
 ### 3.3. Notes on formatting
 *   **Structure:** Use prose for context, bullet points for details.
 *   **Monetary Values:**
-    *   Millions: `USD #,##0.0m` (e.g., USD 1,234.5m)
+    *   Millions: `USD #,##0.0m` (e.g., USD 1,234.5m) **HIGHLY RECOMMEND TO USE MILLION AS THE OUTPUT**
     *   Thousands: `USD #,##0.0k` (e.g., USD 1,234.5k)
 *   **Percentages:** `0.0%` (e.g., 25.7%).
 *   **Negative Numbers:** Use descriptive words for clarity:
