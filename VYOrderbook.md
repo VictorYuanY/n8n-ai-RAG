@@ -7,6 +7,30 @@
 ---
 
 ##  1. SQL CLAUSE
+##  1.0 Introduction of fna.fna_bronze.vw_gob_spencerorderbook
+*   **SHIP_YEAR** This defines the year of the data. 
+*   **SHIP_MONTH** this defines the month of the data. 
+*   **WEEK_NO** this defines the week of the data. The week is used for snapshot function. 
+*   **REPORT_OPERATING_GROUP_CODE_UPDATED** this is the OG code dimension of the data.  
+*   **REPORT_OPERATING_GROUP_DESC_UPDATED** this is the OG description dimension of the data. ** VERY IMPORTANT**
+*   **REPORT_STREAM_CODE**  this is the stream code dimension of the data. 
+*   **REPORT_STREAM_DESC** this is the stream description dimension of the data. 
+*   **REPORT_PRODUCT_GROUP_CODE** this is the PG code dimension of the data. 
+*   **REPORT_PRODUCT_GROUP_DESC** this is the PG description dimension of the data. 
+*   **REPORT_DIVISION_DESC** this is the division description dimension of the data. 
+*   **REPORT_CORPORATE_CUSTOMER_CODE** this is the customer code dimension of the data. 
+*   **REPORT_CORPORATE_CUSTOMER_NAME** this is the customer name dimension of the data. ** VERY IMPORTANT**
+*   **OOH** this is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** *KEY MEASURES** ** VERY IMPORTANT**
+*   **LY_OOH** this is the order_on_hands for last year. 
+*   **YoY_Difference** this is the YoY Difference for **OOH**. ** VERY IMPORTANT FOR YoY Compare**
+*   **LW_OOH** this is the last week OOH. 
+*   **WoW_Difference** this is the WoW difference for **OOH**. ** VERY IMPORTANT FOR WoW Compare**
+*   **Actual** this is the Full Year Actuals. ** VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
+*   **1QR** this is the Full Year 1QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
+*   **2QR** this is the Full Year 2QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR** 
+*   **3QR** this is the Full Year 3QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
+*   **Budget** this is the Full Year Budget ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
+
 ##  1.1. Select Clause
 
 *   Read carefully what the user needs. Since our dataset only contains **`OOH`** as the measure, you always include `OOH` in the select clause. The default select clause will **ALWAYS** have:
@@ -19,6 +43,7 @@
 *   Other parts of the Select Clause depend on what the user asks for. For example:
 *   If the user asks "which customers...", select `REPORT_CORPORATE_CUSTOMER_NAME` along with `SUM(OOH)`.
 *   Similarly, if the user asks for OG (Operating Group) / ST (Stream) / PG (Product Group) level, pick them accordingly and you can refer to the **table 1** below for mapping user terms to SQL columns:
+*   If the user is asking for 2024 actuals or 2025 1QR, will need to select `Actual` or `1QR` and the sql is `select sum(Actual)`
 ### Table 1
 | What users say/write | What it means in SQL                |
 |---------------------|-----------------------------------|
@@ -150,6 +175,26 @@ order by sum(WoW_Difference) DESC
 LIMIT 3
 ```
 
+4. Question: what is current fill rate for apparel? how about vs last year?
+*   Thinking logic: current means this week and year so will need pull this out. For the fill rate, the formula is *OOH / Full Year amount*. For the full year amount, for current year, will need to pick the latest forecast, either 1QR or 2QR. *(reference in 1.1. Core Concepts_Forecasting & Budgeting Section)* If the user explicitly say 1QR or Budget, we will follow this and if not, we will pick Budget in Jan to May, 1QR from May to July, and 2QR from Aug to Oct, 3QR from Oct to Nov. 
+*   for last year's fill rate, it will be easy we just need the `sum(OOH)` for ship_year = 2024 and full year amount use actual column. 
+*   Answer SQL
+
+```sql
+    select sum(OOH), sum(1QR) from fna.fna_bronze.vw_gob_spencerorderbook
+where Ship_Year =  year(current_date()) 
+and Week_No = weekofyear(current_date())-1
+and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
+```
+and then use the sum(OOH) / sum (1QR) to get current year's fill rate. 
+for 2024, the sql will be 
+``` sql
+    select sum(OOH), sum(actual) from fna.fna_bronze.vw_gob_spencerorderbook
+where Ship_Year =  2024
+and Week_No = weekofyear(current_date())-1
+and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
+```
+
 ## 3. Standard Business Conventions & Terminology
 
 These conventions **MUST** be followed in all business interactions:
@@ -177,6 +222,13 @@ These conventions **MUST** be followed in all business interactions:
 *   4.1 if you get PENDING in the ouput under state, status, example ,"status":{"state":"PENDING"}, try to run this query again for five time.
 
 *   4.2 when you get the email question, plesae read **Subject**, for example **:</b> FW: 2025 Global Orderbook as of Jul 14** , this means they are asking number for the week of Jul 14, which is week no of 28. DO NOT USE Current Week No as mentioned in 1.3.1. above. 
+*   
+
+
+
+
+
+
 
 ------
 
