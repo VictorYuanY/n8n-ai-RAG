@@ -1,200 +1,213 @@
-#   Knowledge Base: Querying Enterprise Sales & Order Data (Databricks SQL)
+# Knowledge Base: Querying Enterprise Sales & Order Data (Databricks SQL)
 
 ---
 
-##  Step-by-Step Thinking Logic for Writing SQL for `fna.fna_bronze.vw_gob_spencerorderbook` Dataset
+## Step-by-Step Thinking Logic for Writing SQL for `fna.fna_bronze.vw_gob_spencerorderbook` Dataset
 
 ---
 
-##  1. SQL CLAUSE
-##  1.0 Introduction of fna.fna_bronze.vw_gob_spencerorderbook
-*   **SHIP_YEAR** This defines the year of the data. 
-*   **SHIP_MONTH** this defines the month of the data. 
-*   **WEEK_NO** this defines the week of the data. The week is used for snapshot function. 
-*   **REPORT_OPERATING_GROUP_CODE_UPDATED** this is the OG code dimension of the data.  
-*   **REPORT_OPERATING_GROUP_DESC_UPDATED** this is the OG description dimension of the data. **VERY IMPORTANT**
-*   **REPORT_STREAM_CODE**  this is the stream code dimension of the data. 
-*   **REPORT_STREAM_DESC** this is the stream description dimension of the data. 
-*   **REPORT_PRODUCT_GROUP_CODE** this is the PG code dimension of the data. 
-*   **REPORT_PRODUCT_GROUP_DESC** this is the PG description dimension of the data. 
-*   **REPORT_DIVISION_DESC** this is the division description dimension of the data. 
-*   **REPORT_CORPORATE_CUSTOMER_CODE** this is the customer code dimension of the data. 
-*   **REPORT_CORPORATE_CUSTOMER_NAME** this is the customer name dimension of the data. **VERY IMPORTANT**
-*   **OOH** this is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** **KEY MEASURES** **VERY IMPORTANT**
-*   **LY_OOH** this is the order_on_hands for last year. 
-*   **YoY_Difference** this is the YoY  for **OOH**. **VERY IMPORTANT FOR YoY Compare** **USE COALESCE(..., 0)**
-*   **LW_OOH** this is the last week OOH. 
-*   **WoW_** this is the WoW  for **OOH**. **VERY IMPORTANT FOR WoW Compare** **USE COALESCE(..., 0)**
-*   **Actual** this is the Full Year Actuals. **VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
-*   **1QR** this is the Full Year 1QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
-*   **2QR** this is the Full Year 2QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR** 
-*   **3QR** this is the Full Year 3QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
-*   **Budget** this is the Full Year Budget **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
+## 1. SQL CLAUSE
 
-##  1.1. Select Clause
+### 1.0 Introduction of `fna.fna_bronze.vw_gob_spencerorderbook`
 
-*   Read carefully what the user needs. Since our dataset only contains **`OOH`** as the measure, you always include `OOH` in the select clause. The default select clause will **ALWAYS** have:
-`select sum(OOH)`.
-*   **`OOH`** (from `vw_gob_spencerorderbook`):
-    *   Primary value metric, often represents FOB cost/value of orders/shipments.
-    *   Use `SUM()` with `GROUP BY` in SQL for aggregation (**Mandatory**).
+This dataset contains enterprise sales and order data, with key dimensions and measures as follows:
 
+* **SHIP_YEAR**: This defines the year of the data.
+* **SHIP_MONTH**: This defines the month of the data.
+* **WEEK_NO**: This defines the week of the data. The week is used for snapshot function.
+* **REPORT_OPERATING_GROUP_CODE_UPDATED**: This is the OG code dimension of the data.
+* **REPORT_OPERATING_GROUP_DESC_UPDATED**: This is the OG description dimension of the data. **VERY IMPORTANT**
+* **REPORT_STREAM_CODE**: This is the stream code dimension of the data.
+* **REPORT_STREAM_DESC**: This is the stream description dimension of the data.
+* **REPORT_PRODUCT_GROUP_CODE**: This is the PG code dimension of the data.
+* **REPORT_PRODUCT_GROUP_DESC**: This is the PG description dimension of the data.
+* **REPORT_DIVISION_DESC**: This is the division description dimension of the data.
+* **REPORT_CORPORATE_CUSTOMER_CODE**: This is the customer code dimension of the data.
+* **REPORT_CORPORATE_CUSTOMER_NAME**: This is the customer name dimension of the data. **VERY IMPORTANT**
+* **OOH**: This is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** **KEY MEASURES** **VERY IMPORTANT**
+* **LY_OOH**: This is the order_on_hands for last year.
+* **YoY_Difference**: This is the YoY for **OOH**. **VERY IMPORTANT FOR YoY Compare** **USE COALESCE(..., 0)**
+* **LW_OOH**: This is the last week OOH.
+* **WoW_Difference**: This is the WoW for **OOH**. **VERY IMPORTANT FOR WoW Compare** **USE COALESCE(..., 0)**
+* **Actual**: This is the Full Year Actuals. **VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
+* **1QR**: This is the Full Year 1QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
+* **2QR**: This is the Full Year 2QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR**
+* **3QR**: This is the Full Year 3QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR**
+* **Budget**: This is the Full Year Budget **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR**
 
-*   Other parts of the Select Clause depend on what the user asks for. For example:
-*   If the user asks "which customers...", select `REPORT_CORPORATE_CUSTOMER_NAME` along with `SUM(OOH)`.
-*   Similarly, if the user asks for OG (Operating Group) / ST (Stream) / PG (Product Group) level, pick them accordingly and you can refer to the **table 1** below for mapping user terms to SQL columns:
-*   If the user is asking for 2024 actuals or 2025 1QR, will need to select `Actual` or `1QR` and the sql is `select sum(Actual)`
-### Table 1
-| What users say/write | What it means in SQL                |
-|---------------------|-----------------------------------|
-| OG/Operating Group   | REPORT_OPERATING_GROUP_DESC_UPDATED|
-| stream              | REPORT_STREAM_DESC                 |
-| PG/Product group     | REPORT_PRODUCT_GROUP_DESC          |
-| division             | REPORT_DIVISION_DESC               |
-| customer             | REPORT_CORPORATE_CUSTOMER_NAME    |
-| sales/orders         | OOH                              |
-| YoY Change           | YoY_Difference                   |
-| WoW Change           | WoW_Difference                   |
+### 1.1. Select Clause
+
+* Read carefully what the user needs. Since our dataset only contains **`OOH`** as the measure, you always include `OOH` in the select clause. The default select clause will **ALWAYS** have:
+    `select sum(OOH)`.
+* **`OOH`** (from `vw_gob_spencerorderbook`):
+    * Primary value metric, often represents FOB cost/value of orders/shipments.
+    * Use `SUM()` with `GROUP BY` in SQL for aggregation (**Mandatory**).
+
+* Other parts of the Select Clause depend on what the user asks for. For example:
+    * If the user asks "which customers...", select `REPORT_CORPORATE_CUSTOMER_NAME` along with `SUM(OOH)`.
+    * Similarly, if the user asks for OG (Operating Group) / ST (Stream) / PG (Product Group) level, pick them accordingly and you can refer to the **table 1** below for mapping user terms to SQL columns:
+    * If the user is asking for 2024 actuals or 2025 1QR, will need to select `Actual` or `1QR` and the sql is `select sum(Actual)`
+
+#### Table 1: User Term to SQL Column Mapping
+
+| What users say/write | What it means in SQL |
+| :------------------ | :-------------------------------- |
+| OG/Operating Group  | `REPORT_OPERATING_GROUP_DESC_UPDATED` |
+| stream              | `REPORT_STREAM_DESC`              |
+| PG/Product group    | `REPORT_PRODUCT_GROUP_DESC`       |
+| division            | `REPORT_DIVISION_DESC`            |
+| customer            | `REPORT_CORPORATE_CUSTOMER_NAME`  |
+| sales/orders        | `OOH`                             |
+| YoY Change          | `YoY_Difference`                  |
+| WoW Change          | `WoW_Difference`                  |
 
 * For OG/Operating Group, here is a more detailed mapping:
 
-### Table 2
-| What users say/write | What it means in SQL         |
-|---------------------|-----------------------------|
-| LFFA/Fashion        | LF Fashion                  |
-| LFUM                | LF Markets USA              |
-| Apparel             | Apparel                     |
-| Home                | Home And Accessories        |
-| Miles               | Miles                       |
-| LFAD                | LF Asia Direct              |
-| promocean           | Promocean                   |
-| firework            | Firework                    |
+#### Table 2: Operating Group (OG) Detailed Mapping
+
+| What users say/write | What it means in SQL |
+| :------------------ | :-------------------- |
+| LFFA/Fashion        | `LF Fashion`          |
+| LFUM                | `LF Markets USA`      |
+| Apparel             | `Apparel`             |
+| Home                | `Home And Accessories` |
+| Miles               | `Miles`               |
+| LFAD                | `LF Asia Direct`      |
+| promocean           | `Promocean`           |
+| firework            | `Firework`            |
 
 * **The above OG table can be grouped to 2 Segments:**
-*   **SCS (Supply Chain Solutions):** Includes Apparel, Home.
-*   **Markets (Onshore Businesses):** Includes LF Markets USA, Miles, Promocean, LF Fashion, Fireworks, C2M, Asia Group.
+    * **SCS (Supply Chain Solutions):** Includes `Apparel`, `Home And Accessories`.
+    * **Markets (Onshore Businesses):** Includes `LF Markets USA`, `Miles`, `Promocean`, `LF Fashion`, `Firework`, `C2M`, `Asia Group`.
 
 ---
-## 1.2. FROM Clause
+
+### 1.2. FROM Clause
+
 **Always from `fna.fna_bronze.vw_gob_spencerorderbook`**
 
-## 1.3. WHERE Clause
+### 1.3. WHERE Clause
 
 **IMPORTANT:** *Carefully determine which year or week the user is asking for:*
-### 1.3.1. Ship_Year and Week_No Filter - ***THIS IS A MUST IN WHERE CLAUSE***
-1. If the user specifies the year and week, filter explicitly:
 
-  ```
-  WHERE Ship_Year = <specified_year>
-    AND Week_No = <specified_week>
-  ```
+#### 1.3.1. Ship_Year and Week_No Filter - ***THIS IS A MUST IN WHERE CLAUSE***
 
-2. If the user does **not** specify the year and week:
+1.  If the user specifies the year and week, filter explicitly:
 
-  - If the user says "current week," use the current ISO week number. For example, 2025/7/23 is ISO Week Number 30.
-
-    ```
-    -- In WHERE clause
-    WHERE Week_No = weekofyear(current_date())-1
+    ```sql
+    WHERE Ship_Year = <specified_year>
+      AND Week_No = <specified_week>
     ```
 
-  - If the user says "current year," use the current year:
+2.  If the user does **not** specify the year and week:
 
-    ```
-    -- In WHERE clause
-    WHERE Ship_Year = year(current_date())
-    ```
-### 1.3.2. REPORT_OPERATING_GROUP_DESC_UPDATED and REPORT_CORPORATE_CUSTOMER_NAME Filters 
+    * If the user says "current week," use the current ISO week number. For example, 2025/7/23 is ISO Week Number 30.
+
+        ```sql
+        -- In WHERE clause
+        WHERE Week_No = weekofyear(current_date())-1
+        ```
+
+    * If the user says "current year," use the current year:
+
+        ```sql
+        -- In WHERE clause
+        WHERE Ship_Year = year(current_date())
+        ```
+
+#### 1.3.2. REPORT_OPERATING_GROUP_DESC_UPDATED and REPORT_CORPORATE_CUSTOMER_NAME Filters
+
 * those are optional in where clause depending on what the user ask. If they need OG level or customer level, then we will put this in where clause and can refer **table 1 and table 2**
 
-### 1.4. GROUP BY Clause - 
-*   Query aggregated OOH `GROUP BY REPORT_CORPORATE_CUSTOMER_NAME` if user asks for customer level. 
-*    Query aggregated OOH `GROUP BY REPORT_OPERATING_GROUP_DESC_UPDATED` if user asks for OG level
+### 1.4. GROUP BY Clause -
+
+* Query aggregated OOH `GROUP BY REPORT_CORPORATE_CUSTOMER_NAME` if user asks for customer level.
+* Query aggregated OOH `GROUP BY REPORT_OPERATING_GROUP_DESC_UPDATED` if user asks for OG level
 
 ### 1.5. ORDER BY Clause - Use this when users asks ranking
 
 ### 1.6. LIMIT Clause - from the ranking from ORDER BY, limit how many are showing
 
-
 ## Additional Tips:
 
-- Always parameterize user inputs to prevent SQL injection and improve query safety.
-- Use SQL comments to clarify complex logic or future maintenance.
-- Take advantage of Databricks SQL built-in functions and Delta Lake optimizations for efficiency.
+-   Always parameterize user inputs to prevent SQL injection and improve query safety.
+-   Use SQL comments to clarify complex logic or future maintenance.
+-   Take advantage of Databricks SQL built-in functions and Delta Lake optimizations for efficiency.
 
 ---
 
 ## 2. Sample Questions with the SQL provided
-1. Questions: What’s current OOH look like? 
-*   Thinking Logic: as the user did not ask level of details, so we just give the total OOH. so select sum(OOH) is okay. in where clause, since ship_year and week_no are must, and the user did not specify which year and which week, but mentioned current, so we just pull the current year and week. same reason as the user did not ask level of details, we can skip group by and order by, then the final sql will be 
-*   Answer SQL: 
-```sql
-select sum(OOH) from fna.fna_bronze.vw_gob_spencerorderbook
-where Ship_Year =  year(current_date()) 
-and Week_No = weekofyear(current_date())-1
-```
-2. Question: which customer contributed the most growth vs last year? 
-*   Thinking logic:since the user asked for the customer level, will need to select **REPORT_CORPORATE_CUSTOMER_NAME** in the sql and also group by **REPORT_CORPORATE_CUSTOMER_NAME**. As the customer is asking fro the most growth, will need to have YoY_Difference and order by **REPORT_CORPORATE_CUSTOMER_NAME DESC** and limit to a number
-*   Answer SQL
-``` sql
-select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(YoY_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
-where Ship_Year =  year(current_date()) 
-and Week_No = weekofyear(current_date())-1
-group by REPORT_CORPORATE_CUSTOMER_NAME
-order by COALESCE(sum(YoY_Difference),0) DESC
-LIMIT 5
-```
-3.  Question: what's our WoW performance? How does our weekly intake look like? What are our top movers for WoW change? 
-*   Thinking logic: WoW performance is very similar to YoY, so we will need **WoW_Difference** from our dataset and if the user is asking for top moving customers, then we will need to get **REPORT_CORPORATE_CUSTOMER_NAME** and group by this and order by **sum(WoW_Difference)**
-*   Answer SQL
 
-```
-select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
-where Ship_Year =  year(current_date()) 
-and Week_No = weekofyear(current_date())-1
-group by REPORT_CORPORATE_CUSTOMER_NAME
-order by COALESCE(sum(WoW_Difference),0) DESC 
-LIMIT 3
-```
-```
-select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
-where Ship_Year =  year(current_date()) 
-and Week_No = weekofyear(current_date())-1
-group by REPORT_CORPORATE_CUSTOMER_NAME
-order by COALESCE(sum(WoW_Difference),0) ASC 
-LIMIT 3
-```
-those sqls above will give us names for top 3 movers, for both growth and decrease. If the user also ask to list this week OOH, last week OOH and the the WoW change, we will just select two more **OOH** and ***LW_OOH**
+1.  Questions: What’s current OOH look like?
+    * Thinking Logic: as the user did not ask level of details, so we just give the total OOH. so select sum(OOH) is okay. in where clause, since ship_year and week_no are must, and the user did not specify which year and which week, but mentioned current, so we just pull the current year and week. same reason as the user did not ask level of details, we can skip group by and order by, then the final sql will be
+    * Answer SQL:
+        ```sql
+        select sum(OOH) from fna.fna_bronze.vw_gob_spencerorderbook
+        where Ship_Year = year(current_date())
+        and Week_No = weekofyear(current_date())-1
+        ```
+2.  Question: which customer contributed the most growth vs last year?
+    * Thinking logic:since the user asked for the customer level, will need to select **REPORT_CORPORATE_CUSTOMER_NAME** in the sql and also group by **REPORT_CORPORATE_CUSTOMER_NAME**. As the customer is asking fro the most growth, will need to have YoY_Difference and order by **REPORT_CORPORATE_CUSTOMER_NAME DESC** and limit to a number
+    * Answer SQL
+        ```sql
+        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(YoY_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        where Ship_Year = year(current_date())
+        and Week_No = weekofyear(current_date())-1
+        group by REPORT_CORPORATE_CUSTOMER_NAME
+        order by COALESCE(sum(YoY_Difference),0) DESC
+        LIMIT 5
+        ```
+3.  Question: what's our WoW performance? How does our weekly intake look like? What are our top movers for WoW change?
+    * Thinking logic: WoW performance is very similar to YoY, so we will need **WoW_Difference** from our dataset and if the user is asking for top moving customers, then we will need to get **REPORT_CORPORATE_CUSTOMER_NAME** and group by this and order by **sum(WoW_Difference)**
+    * Answer SQL
 
-```
-select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
-where Ship_Year =  year(current_date()) 
-and Week_No = weekofyear(current_date())-2
-group by REPORT_CORPORATE_CUSTOMER_NAME
-order by COALESCE(sum(WoW_Difference),0) DESC 
-LIMIT 3
-```
+        ```sql
+        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        where Ship_Year = year(current_date())
+        and Week_No = weekofyear(current_date())-1
+        group by REPORT_CORPORATE_CUSTOMER_NAME
+        order by COALESCE(sum(WoW_Difference),0) DESC
+        LIMIT 3
+        ```
+        ```sql
+        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        where Ship_Year = year(current_date())
+        and Week_No = weekofyear(current_date())-1
+        group by REPORT_CORPORATE_CUSTOMER_NAME
+        order by COALESCE(sum(WoW_Difference),0) ASC
+        LIMIT 3
+        ```
+        those sqls above will give us names for top 3 movers, for both growth and decrease. If the user also ask to list this week OOH, last week OOH and the the WoW change, we will just select two more **OOH** and ***LW_OOH**
 
-4. Question: what is current fill rate for apparel? how about vs last year?
-*   Thinking logic: current means this week and year so will need pull this out. For the fill rate, the formula is *OOH / Full Year amount*. For the full year amount, for current year, will need to pick the latest forecast, either 1QR or 2QR. *(reference in 1.1. Core Concepts_Forecasting & Budgeting Section)* If the user explicitly say 1QR or Budget, we will follow this and if not, we will pick Budget in Jan to May, 1QR from May to July, and 2QR from Aug to Oct, 3QR from Oct to Nov. 
-*   for last year's fill rate, it will be easy we just need the `sum(OOH)` for ship_year = 2024 and full year amount use actual column. 
-*   Answer SQL
+        ```sql
+        select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        where Ship_Year = year(current_date())
+        and Week_No = weekofyear(current_date())-2
+        group by REPORT_CORPORATE_CUSTOMER_NAME
+        order by COALESCE(sum(WoW_Difference),0) DESC
+        LIMIT 3
+        ```
 
-```sql
-    select sum(OOH), sum(1QR) from fna.fna_bronze.vw_gob_spencerorderbook
-where Ship_Year =  year(current_date()) 
-and Week_No = weekofyear(current_date())-1
-and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
-```
-and then use the sum(OOH) / sum (1QR) to get current year's fill rate. 
-for 2024, the sql will be 
-``` sql
-    select sum(OOH), sum(actual) from fna.fna_bronze.vw_gob_spencerorderbook
-where Ship_Year =  2024
-and Week_No = weekofyear(current_date())-1
-and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
-```
-and then use the sum(OOH) / sum(Actual) for 2024 to get the fill rate. 
+4.  Question: what is current fill rate for apparel? how about vs last year?
+    * Thinking logic: current means this week and year so will need pull this out. For the fill rate, the formula is *OOH / Full Year amount*. For the full year amount, for current year, will need to pick the latest forecast, either 1QR or 2QR. *(reference in 1.1. Core Concepts_Forecasting & Budgeting Section)* If the user explicitly say 1QR or Budget, we will follow this and if not, we will pick Budget in Jan to May, 1QR from May to July, and 2QR from Aug to Oct, 3QR from Oct to Nov.
+    * for last year's fill rate, it will be easy we just need the `sum(OOH)` for ship_year = 2024 and full year amount use actual column.
+    * Answer SQL
+
+        ```sql
+        select sum(OOH), sum(1QR) from fna.fna_bronze.vw_gob_spencerorderbook
+        where Ship_Year = year(current_date())
+        and Week_No = weekofyear(current_date())-1
+        and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
+        ```
+        and then use the sum(OOH) / sum (1QR) to get current year's fill rate.
+        for 2024, the sql will be
+        ```sql
+        select sum(OOH), sum(actual) from fna.fna_bronze.vw_gob_spencerorderbook
+        where Ship_Year = 2024
+        and Week_No = weekofyear(current_date())-1
+        and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
+        ```
+        and then use the sum(OOH) / sum(Actual) for 2024 to get the fill rate.
 
 ## 3. Standard Business Conventions & Terminology
 
@@ -202,28 +215,29 @@ These conventions **MUST** be followed in all business interactions:
 
 ### 3.1. OOH (Order on Hand) Definition
 
-*   When business users refer to **OOH**, they almost always mean **orders scheduled to ship within the *current* calendar year** (e.g., 2025 as of the last update date), even if those orders were placed in a prior year or are part of snapshots containing next-year data.
-*   **Implementation:** Filter queries accordingly, typically using `SHIP_YEAR = ?current_year?` (e.g., `SHIP_YEAR = 2025`) on the `vw_gob_spencerorderbook` table for standard OOH analysis.
+* When business users refer to **OOH**, they almost always mean **orders scheduled to ship within the *current* calendar year** (e.g., 2025 as of the last update date), even if those orders were placed in a prior year or are part of snapshots containing next-year data.
+* **Implementation:** Filter queries accordingly, typically using `SHIP_YEAR = ?current_year?` (e.g., `SHIP_YEAR = 2025`) on the `vw_gob_spencerorderbook` table for standard OOH analysis.
 
 ### 3.2. Common Terminology/Aliases
 
-*   **SCS (Supply Chain Services):** This term is sometimes used to refer collectively to the **'Home & Accessories'** and **'Apparel'** Operating Groups. Be aware of this alias when interpreting requests or filtering data. (See Appendix 8 for breakdown dimensions related to these OGs).
+* **SCS (Supply Chain Services):** This term is sometimes used to refer collectively to the **'Home & Accessories'** and **'Apparel'** Operating Groups. Be aware of this alias when interpreting requests or filtering data. (See Appendix 8 for breakdown dimensions related to these OGs).
 
 ### 3.3. Notes on formatting
-*   **Structure:** Use prose for context, bullet points for details.
-*   **Monetary Values:**
-    *   Millions: `USD #,##0.0m` (e.g., USD 1,234.5m) **HIGHLY RECOMMEND TO USE MILLION AS THE OUTPUT**
-    *   Thousands: `USD #,##0.0k` (e.g., USD 1,234.5k)
-*   **Percentages:** `0.0%` (e.g., 25.7%).
-*   **Negative Numbers:** Use descriptive words for clarity:
-    *   `Loss of USD 1.0m` (instead of `- USD 1.0m Profit`)
-    *   `Decrease of 5.0%` or `Decline of 5.0%` (instead of `- 5.0% Change`)
 
-###  4. IMPORTANT 
-*   4.1 if you get PENDING in the ouput under state, status, example ,"status":{"state":"PENDING"}, try to run this query again for five time.
+* **Structure:** Use prose for context, bullet points for details.
+* **Monetary Values:**
+    * Millions: `USD #,##0.0m` (e.g., USD 1,234.5m) **HIGHLY RECOMMEND TO USE MILLION AS THE OUTPUT**
+    * Thousands: `USD #,##0.0k` (e.g., USD 1,234.5k)
+* **Percentages:** `0.0%` (e.g., 25.7%).
+* **Negative Numbers:** Use descriptive words for clarity:
+    * `Loss of USD 1.0m` (instead of `- USD 1.0m Profit`)
+    * `Decrease of 5.0%` or `Decline of 5.0%` (instead of `- 5.0% Change`)
 
-*   4.2 when you get the email question, plesae read **Subject**, for example **:</b> FW: 2025 Global Orderbook as of Jul 14** , this means they are asking number for the week of Jul 14, which is week no of 28. DO NOT USE Current Week No as mentioned in 1.3.1. above. 
-*   
+### 4. IMPORTANT
+
+* **4.1** if you get PENDING in the ouput under state, status, example ,"status":{"state":"PENDING"}, try to run this query again for five time.
+
+* **4.2** when you get the email question, plesae read **Subject**, for example **:</b> FW: 2025 Global Orderbook as of Jul 14** , this means they are asking number for the week of Jul 14, which is week no of 28. DO NOT USE Current Week No as mentioned in 1.3.1. above.
 
 
 
