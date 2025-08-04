@@ -12,7 +12,7 @@
 *   **SHIP_MONTH** this defines the month of the data. 
 *   **WEEK_NO** this defines the week of the data. The week is used for snapshot function. 
 *   **REPORT_OPERATING_GROUP_CODE_UPDATED** this is the OG code dimension of the data.  
-*   **REPORT_OPERATING_GROUP_DESC_UPDATED** this is the OG description dimension of the data. ** VERY IMPORTANT**
+*   **REPORT_OPERATING_GROUP_DESC_UPDATED** this is the OG description dimension of the data. **VERY IMPORTANT**
 *   **REPORT_STREAM_CODE**  this is the stream code dimension of the data. 
 *   **REPORT_STREAM_DESC** this is the stream description dimension of the data. 
 *   **REPORT_PRODUCT_GROUP_CODE** this is the PG code dimension of the data. 
@@ -20,11 +20,11 @@
 *   **REPORT_DIVISION_DESC** this is the division description dimension of the data. 
 *   **REPORT_CORPORATE_CUSTOMER_CODE** this is the customer code dimension of the data. 
 *   **REPORT_CORPORATE_CUSTOMER_NAME** this is the customer name dimension of the data. ** VERY IMPORTANT**
-*   **OOH** this is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** *KEY MEASURES** ** VERY IMPORTANT**
+*   **OOH** this is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** **KEY MEASURES** **VERY IMPORTANT**
 *   **LY_OOH** this is the order_on_hands for last year. 
-*   **YoY_Difference** this is the YoY Difference for **OOH**. ** VERY IMPORTANT FOR YoY Compare**
+*   **YoY_Difference** this is the YoY Difference for **OOH**. **VERY IMPORTANT FOR YoY Compare** **USE COALESCE(..., 0)**
 *   **LW_OOH** this is the last week OOH. 
-*   **WoW_Difference** this is the WoW difference for **OOH**. ** VERY IMPORTANT FOR WoW Compare**
+*   **WoW_Difference** this is the WoW difference for **OOH**. **VERY IMPORTANT FOR WoW Compare** **USE COALESCE(..., 0)**
 *   **Actual** this is the Full Year Actuals. ** VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
 *   **1QR** this is the Full Year 1QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
 *   **2QR** this is the Full Year 2QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR** 
@@ -137,7 +137,7 @@ and Week_No = weekofyear(current_date())-1
 *   Thinking logic:since the user asked for the customer level, will need to select **REPORT_CORPORATE_CUSTOMER_NAME** in the sql and also group by **REPORT_CORPORATE_CUSTOMER_NAME**. As the customer is asking fro the most growth, will need to have YoY_Difference and order by **REPORT_CORPORATE_CUSTOMER_NAME DESC** and limit to a number
 *   Answer SQL
 ``` sql
-select REPORT_CORPORATE_CUSTOMER_NAME, sum(YoY_Difference) from fna.fna_bronze.vw_gob_spencerorderbook
+select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(YoY_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-1
 group by REPORT_CORPORATE_CUSTOMER_NAME
@@ -149,7 +149,7 @@ LIMIT 5
 *   Answer SQL
 
 ```
-select REPORT_CORPORATE_CUSTOMER_NAME, sum(WoW_Difference) from fna.fna_bronze.vw_gob_spencerorderbook
+select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-1
 group by REPORT_CORPORATE_CUSTOMER_NAME
@@ -157,7 +157,7 @@ order by sum(WoW_Difference) DESC
 LIMIT 3
 ```
 ```
-select REPORT_CORPORATE_CUSTOMER_NAME, sum(WoW_Difference) from fna.fna_bronze.vw_gob_spencerorderbook
+select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-1
 group by REPORT_CORPORATE_CUSTOMER_NAME
@@ -167,7 +167,7 @@ LIMIT 3
 those sqls above will give us names for top 3 movers, for both growth and decrease. If the user also ask to list this week OOH, last week OOH and the the WoW change, we will just select two more **OOH** and ***LW_OOH**
 
 ```
-select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), sum(WoW_Difference) from fna.fna_bronze.vw_gob_spencerorderbook
+select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-2
 group by REPORT_CORPORATE_CUSTOMER_NAME
