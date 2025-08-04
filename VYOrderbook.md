@@ -29,11 +29,11 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 * **YoY_Difference**: This is the YoY for **OOH**. **VERY IMPORTANT FOR YoY Compare**. **USE COALESCE(..., 0)**
 * **LW_OOH**: This is the last week OOH.
 * **WoW_Difference**: This is the WoW for **OOH**. **VERY IMPORTANT FOR WoW Compare**. **USE COALESCE(..., 0)**
-* **Actual**: This is the Full Year Actuals. **VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
-* **1QR**: This is the Full Year 1QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
-* **2QR**: This is the Full Year 2QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR**
-* **3QR**: This is the Full Year 3QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR**
-* **Budget**: This is the Full Year Budget **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR**
+* **Actual**: This is the Full Year Actuals. **VERY IMPORTANT FOR *Fill Rate* Calculations as the base for prior years**
+* **1QR**: This is the Full Year 1QR **VERY IMPORTANT FOR *Fill Rate* Calculations as the base for current years 1QR**
+* **2QR**: This is the Full Year 2QR **VERY IMPORTANT FOR *Fill Rate* Calculations as the base for current years 2QR**
+* **3QR**: This is the Full Year 3QR **VERY IMPORTANT FOR *Fill Rate* Calculations as the base for current years 3QR**
+* **Budget**: This is the Full Year Budget **VERY IMPORTANT FOR *Fill Rate* Calculations as the base for current years 3QR**
 
 ### 1.1. Select Clause
 
