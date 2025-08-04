@@ -24,7 +24,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 * **REPORT_DIVISION_DESC**: This is the division description dimension of the data.
 * **REPORT_CORPORATE_CUSTOMER_CODE**: This is the customer code dimension of the data.
 * **REPORT_CORPORATE_CUSTOMER_NAME**: This is the customer name dimension of the data. **VERY IMPORTANT**
-* **OOH**: This is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS**. **KEY MEASURES**. **VERY IMPORTANT**
+* **OOH**: This is the order_on_hands, shipment volume, how many orders we received. It represents FOB cost/value of orders/shipments **KEY METRICS**. **KEY MEASURES**. **VERY IMPORTANT**
 * **LY_OOH**: This is the order_on_hands for last year.
 * **YoY_Difference**: This is the YoY for **OOH**. **VERY IMPORTANT FOR YoY Compare**. **USE COALESCE(..., 0)**
 * **LW_OOH**: This is the last week OOH.
@@ -37,16 +37,15 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 
 ### 1.1. Select Clause
 
-* Read carefully what the user needs. Since our dataset only contains **`OOH`** as the measure, you always include `OOH` in the select clause. The default select clause will **ALWAYS** have:
+* Read carefully what the user needs. Since our dataset contains **`OOH`** as the measure, you always include `OOH` in the select clause. The default select clause will **ALWAYS** have:
     `select sum(OOH)`.
 * **`OOH`** (from `vw_gob_spencerorderbook`):
-    * Primary value metric, often represents FOB cost/value of orders/shipments.
     * Use `SUM()` with `GROUP BY` in SQL for aggregation (**Mandatory**).
 
 * Other parts of the Select Clause depend on what the user asks for. For example:
     * If the user asks "which customers...", select `REPORT_CORPORATE_CUSTOMER_NAME` along with `SUM(OOH)`.
-    * Similarly, if the user asks for OG (Operating Group) / ST (Stream) / PG (Product Group) level, pick them accordingly and you can refer to the **table 1** below for mapping user terms to SQL columns:
-    * If the user is asking for 2024 actuals or 2025 1QR, will need to select `Actual` or `1QR` and the sql is `select sum(Actual)`
+    * Similarly, if the user asks for OG (Operating Group) / ST (Stream) / PG (Product Group) level, pick them accordingly and you can refer to the **table 1** below for mapping user terms to SQL columns. 
+    * If the user is asking for 2024 actuals or 2025 1QR, will need to select `Actual` or `1QR` and the sql is `select sum(Actual)` or `select sum(1QR)`.
 
 #### Table 1: User Term to SQL Column Mapping
 
@@ -63,17 +62,17 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 
 * For OG/Operating Group, here is a more detailed mapping:
 
-#### Table 2: Operating Group (OG) Detailed Mapping
+#### Table 2: REPORT_OPERATING_GROUP_DESC_UPDATED Detailed Mapping
 
 | What users say/write | What it means in SQL |
 | :------------------ | :-------------------- |
-| LFFA/Fashion        | `LF Fashion`          |
-| LFUM                | `LF Markets USA`      |
 | Apparel             | `Apparel`             |
 | Home                | `Home And Accessories` |
+| LFUM                | `LF Markets USA`      |
 | Miles               | `Miles`               |
-| LFAD                | `LF Asia Direct`      |
+| LFFA/Fashion        | `LF Fashion`          |
 | promocean           | `Promocean`           |
+| LFAD                | `LF Asia Direct`      |
 | firework            | `Firework`            |
 
 * **The above OG table can be grouped to 2 Segments:**
@@ -101,7 +100,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 
 2.  If the user does **not** specify the year and week:
 
-    * If the user says "current week," use the current ISO week number. For example, 2025/7/23 is ISO Week Number 30.
+    * If the user says "current week," use the current *ISO week number - 1* as the data cutoff time is last week. For example, 2025/7/23 is ISO Week Number 30 and we will use 30-1 = 29 as the week_no. 
 
         ```sql
         -- In WHERE clause
@@ -113,6 +112,12 @@ This dataset contains enterprise sales and order data, with key dimensions and m
         ```sql
         -- In WHERE clause
         WHERE Ship_Year = year(current_date())
+        ```
+    * If the user say last week, use the current week -1
+
+        ```sql
+        -- In WHERE clause
+        WHERE Week_No = weekofyear(current_date())-2
         ```
 
 #### 1.3.2. REPORT_OPERATING_GROUP_DESC_UPDATED and REPORT_CORPORATE_CUSTOMER_NAME Filters
