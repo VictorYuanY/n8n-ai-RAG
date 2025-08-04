@@ -79,8 +79,6 @@ This dataset contains enterprise sales and order data, with key dimensions and m
     * **SCS (Supply Chain Solutions):** Includes `Apparel`, `Home And Accessories`.
     * **Markets (Onshore Businesses):** Includes `LF Markets USA`, `Miles`, `Promocean`, `LF Fashion`, `Firework`, `C2M`, `Asia Group`.
 
----
-
 ### 1.2. FROM Clause
 
 **Always from `fna.fna_bronze.vw_gob_spencerorderbook`**
@@ -214,6 +212,8 @@ This dataset contains enterprise sales and order data, with key dimensions and m
         ```
         and then use the sum(OOH) / sum(Actual) for 2024 to get the fill rate.
 
+---
+
 ## 3. Standard Business Conventions & Terminology
 
 These conventions **MUST** be followed in all business interactions:
@@ -238,13 +238,19 @@ These conventions **MUST** be followed in all business interactions:
     * `Loss of USD 1.0m` (instead of `- USD 1.0m Profit`)
     * `Decrease of 5.0%` or `Decline of 5.0%` (instead of `- 5.0% Change`)
 
+---
+
 ### 4. IMPORTANT
 
 * **4.1** if you get PENDING in the ouput under state, status, example ,"status":{"state":"PENDING"}, try to run this query again for five time.
 
 * **4.2** when you get the email question, plesae read **Subject**, for example **:</b> FW: 2025 Global Orderbook as of Jul 14** , this means they are asking number for the week of Jul 14, which is week no of 28. DO NOT USE Current Week No as mentioned in 1.3.1. above.
 
+---
 
+### 4. OUTPUT Format
+
+* **4.1** Include the week_no in the output. When the user requests information for the "current week," calculate weekofyear(current_date()) - 1 and use this value as the week number in the result. For example, since today is August 4, 2025 (ISO week 31), subtracting 1 gives week 30. The output should clearly state this as "as of week 30" to provide precise context.
 
 
 
