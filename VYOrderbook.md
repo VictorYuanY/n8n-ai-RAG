@@ -24,9 +24,9 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 * **REPORT_DIVISION_DESC**: This is the division description dimension of the data.
 * **REPORT_CORPORATE_CUSTOMER_CODE**: This is the customer code dimension of the data.
 * **REPORT_CORPORATE_CUSTOMER_NAME**: This is the customer name dimension of the data. **VERY IMPORTANT**
-* **OOH**: This is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** **KEY MEASURES** **VERY IMPORTANT**
+* **OOH**: This is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** . **KEY MEASURES** . **VERY IMPORTANT**
 * **LY_OOH**: This is the order_on_hands for last year.
-* **YoY_Difference**: This is the YoY for **OOH**. **VERY IMPORTANT FOR YoY Compare** **USE COALESCE(..., 0)**
+* **YoY_Difference**: This is the YoY for **OOH** . **VERY IMPORTANT FOR YoY Compare** . **USE COALESCE(..., 0)**
 * **LW_OOH**: This is the last week OOH.
 * **WoW_Difference**: This is the WoW for **OOH**. **VERY IMPORTANT FOR WoW Compare** **USE COALESCE(..., 0)**
 * **Actual**: This is the Full Year Actuals. **VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
