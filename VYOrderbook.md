@@ -19,17 +19,17 @@
 *   **REPORT_PRODUCT_GROUP_DESC** this is the PG description dimension of the data. 
 *   **REPORT_DIVISION_DESC** this is the division description dimension of the data. 
 *   **REPORT_CORPORATE_CUSTOMER_CODE** this is the customer code dimension of the data. 
-*   **REPORT_CORPORATE_CUSTOMER_NAME** this is the customer name dimension of the data. ** VERY IMPORTANT**
+*   **REPORT_CORPORATE_CUSTOMER_NAME** this is the customer name dimension of the data. **VERY IMPORTANT**
 *   **OOH** this is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** **KEY MEASURES** **VERY IMPORTANT**
 *   **LY_OOH** this is the order_on_hands for last year. 
 *   **YoY_Difference** this is the YoY Difference for **OOH**. **VERY IMPORTANT FOR YoY Compare** **USE COALESCE(..., 0)**
 *   **LW_OOH** this is the last week OOH. 
 *   **WoW_Difference** this is the WoW difference for **OOH**. **VERY IMPORTANT FOR WoW Compare** **USE COALESCE(..., 0)**
-*   **Actual** this is the Full Year Actuals. ** VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
-*   **1QR** this is the Full Year 1QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
-*   **2QR** this is the Full Year 2QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR** 
-*   **3QR** this is the Full Year 3QR ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
-*   **Budget** this is the Full Year Budget ** VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
+*   **Actual** this is the Full Year Actuals. **VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
+*   **1QR** this is the Full Year 1QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
+*   **2QR** this is the Full Year 2QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR** 
+*   **3QR** this is the Full Year 3QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
+*   **Budget** this is the Full Year Budget **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 3QR** 
 
 ##  1.1. Select Clause
 
