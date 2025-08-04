@@ -194,6 +194,7 @@ where Ship_Year =  2024
 and Week_No = weekofyear(current_date())-1
 and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
 ```
+and then use the sum(ooh) / sum (actual) for 2024 to get the fill rate. 
 
 ## 3. Standard Business Conventions & Terminology
 
