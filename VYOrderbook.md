@@ -22,9 +22,9 @@
 *   **REPORT_CORPORATE_CUSTOMER_NAME** this is the customer name dimension of the data. **VERY IMPORTANT**
 *   **OOH** this is the order_on_hands, shipment volume, how many orders we received. **KEY METRICS** **KEY MEASURES** **VERY IMPORTANT**
 *   **LY_OOH** this is the order_on_hands for last year. 
-*   **YoY_Difference** this is the YoY Difference for **OOH**. **VERY IMPORTANT FOR YoY Compare** **USE COALESCE(..., 0)**
+*   **YoY_Difference** this is the YoY  for **OOH**. **VERY IMPORTANT FOR YoY Compare** **USE COALESCE(..., 0)**
 *   **LW_OOH** this is the last week OOH. 
-*   **WoW_Difference** this is the WoW difference for **OOH**. **VERY IMPORTANT FOR WoW Compare** **USE COALESCE(..., 0)**
+*   **WoW_** this is the WoW  for **OOH**. **VERY IMPORTANT FOR WoW Compare** **USE COALESCE(..., 0)**
 *   **Actual** this is the Full Year Actuals. **VERY IMPORTANT FOR Fill Rate Calculations as the base for prior years**
 *   **1QR** this is the Full Year 1QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 1QR**
 *   **2QR** this is the Full Year 2QR **VERY IMPORTANT FOR Fill Rate Calculations as the base for current years 2QR** 
@@ -141,7 +141,7 @@ select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(YoY_Difference),0) from fna.
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-1
 group by REPORT_CORPORATE_CUSTOMER_NAME
-order by sum(YoY_Difference) DESC
+order by COALESCE(sum(YoY_Difference),0) DESC
 LIMIT 5
 ```
 3.  Question: what's our WoW performance? How does our weekly intake look like? What are our top movers for WoW change? 
@@ -153,7 +153,7 @@ select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-1
 group by REPORT_CORPORATE_CUSTOMER_NAME
-order by sum(WoW_Difference) DESC 
+order by COALESCE(sum(WoW_Difference),0) DESC 
 LIMIT 3
 ```
 ```
@@ -161,7 +161,7 @@ select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-1
 group by REPORT_CORPORATE_CUSTOMER_NAME
-order by sum(WoW_Difference) ASC 
+order by COALESCE(sum(WoW_Difference),0) ASC 
 LIMIT 3
 ```
 those sqls above will give us names for top 3 movers, for both growth and decrease. If the user also ask to list this week OOH, last week OOH and the the WoW change, we will just select two more **OOH** and ***LW_OOH**
@@ -171,7 +171,7 @@ select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), COALESCE(sum(WoW_D
 where Ship_Year =  year(current_date()) 
 and Week_No = weekofyear(current_date())-2
 group by REPORT_CORPORATE_CUSTOMER_NAME
-order by sum(WoW_Difference) DESC 
+order by COALESCE(sum(WoW_Difference),0) DESC 
 LIMIT 3
 ```
 
