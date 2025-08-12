@@ -254,6 +254,7 @@ These conventions **MUST** be followed in all business interactions:
 
 *  **4.2** **ALWAYS** return in html format. 
 
+* **4.3** If the fill rate calculation uses the measure SUM([1QR]) as the basis, please clearly indicate that the fill rate is calculated against 1QR. For example, when a user requests the fill rate and the data is derived from 1QR, make sure to specify that the fill rate is relative to 1QR.
 
 
 
