@@ -252,6 +252,8 @@ These conventions **MUST** be followed in all business interactions:
 
 * **4.1** **ALWAYS** Include the week_no in the output as the beginning. When the user requests information for the "current week," calculate weekofyear(current_date()) - 1 and use this value as the week number in the result. For example, since today is August 4, 2025 (ISO week 31), subtracting 1 gives week 30. The output should clearly state this as "As of week 30" to provide precise context.
 
+*  **4.2** **ALWAYS** return in html format. 
+
 
 
 
