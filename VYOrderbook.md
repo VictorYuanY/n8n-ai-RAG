@@ -2,13 +2,13 @@
 
 ---
 
-## Step-by-Step Thinking Logic for Writing SQL for `fna.fna_bronze.vw_gob_spencerorderbook` Dataset
+## Step-by-Step Thinking Logic for Writing SQL for `fna.fna_bronze.vw_gob_chatbot` Dataset
 
 ---
 
 ## 1. SQL CLAUSE
 
-### 1.0 Introduction of `fna.fna_bronze.vw_gob_spencerorderbook`
+### 1.0 Introduction of `fna.fna_bronze.vw_gob_chatbot`
 
 This dataset contains enterprise sales and order data, with key dimensions and measures as follows:
 
@@ -39,7 +39,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 
 * Read carefully what the user needs. Since our dataset contains **`OOH`** as the measure, you always include `OOH` in the select clause. The default select clause will **ALWAYS** have:
     `select sum(OOH)`.
-* **`OOH`** (from `vw_gob_spencerorderbook`):
+* **`OOH`** (from `vw_gob_chatbot`):
     * Use `SUM()` with `GROUP BY` in SQL for aggregation (**Mandatory**).
 
 * Other parts of the Select Clause depend on what the user asks for. For example:
@@ -81,7 +81,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
 
 ### 1.2. FROM Clause
 
-**Always from `fna.fna_bronze.vw_gob_spencerorderbook`**
+**Always from `fna.fna_bronze.vw_gob_chatbot`**
 
 ### 1.3. WHERE Clause
 
@@ -145,7 +145,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
     * Thinking Logic: as the user did not ask level of details, so we just give the total OOH. so select sum(OOH) is okay. in where clause, since ship_year and week_no are must, and the user did not specify which year and which week, but mentioned current, so we just pull the current year and week. same reason as the user did not ask level of details, we can skip group by and order by, then the final sql will be
     * Answer SQL:
         ```sql
-        select sum(OOH) from fna.fna_bronze.vw_gob_spencerorderbook
+        select sum(OOH) from fna.fna_bronze.vw_gob_chatbot
         where Ship_Year = year(current_date())
         and Week_No = weekofyear(current_date())-1
         ```
@@ -153,7 +153,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
     * Thinking logic:since the user asked for the customer level, will need to select **REPORT_CORPORATE_CUSTOMER_NAME** in the sql and also group by **REPORT_CORPORATE_CUSTOMER_NAME**. As the customer is asking fro the most growth, will need to have YoY_Difference and order by **REPORT_CORPORATE_CUSTOMER_NAME DESC** and limit to a number
     * Answer SQL
         ```sql
-        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(YoY_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(YoY_Difference),0) from fna.fna_bronze.vw_gob_chatbot
         where Ship_Year = year(current_date())
         and Week_No = weekofyear(current_date())-1
         group by REPORT_CORPORATE_CUSTOMER_NAME
@@ -165,7 +165,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
     * Answer SQL
 
         ```sql
-        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_chatbot
         where Ship_Year = year(current_date())
         and Week_No = weekofyear(current_date())-1
         group by REPORT_CORPORATE_CUSTOMER_NAME
@@ -173,7 +173,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
         LIMIT 3
         ```
         ```sql
-        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        select REPORT_CORPORATE_CUSTOMER_NAME, COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_chatbot
         where Ship_Year = year(current_date())
         and Week_No = weekofyear(current_date())-1
         group by REPORT_CORPORATE_CUSTOMER_NAME
@@ -183,7 +183,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
         those sqls above will give us names for top 3 movers, for both growth and decrease. If the user also ask to list this week OOH, last week OOH and the the WoW change, we will just select two more **OOH** and ***LW_OOH**
 
         ```sql
-        select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_spencerorderbook
+        select REPORT_CORPORATE_CUSTOMER_NAME, SUM(OOH), SUM(LW_OOH), COALESCE(sum(WoW_Difference),0) from fna.fna_bronze.vw_gob_chatbot
         where Ship_Year = year(current_date())
         and Week_No = weekofyear(current_date())-2
         group by REPORT_CORPORATE_CUSTOMER_NAME
@@ -197,7 +197,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
     * Answer SQL
 
         ```sql
-        select sum(OOH), sum(1QR) from fna.fna_bronze.vw_gob_spencerorderbook
+        select sum(OOH), sum(1QR) from fna.fna_bronze.vw_gob_chatbot
         where Ship_Year = year(current_date())
         and Week_No = weekofyear(current_date())-1
         and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
@@ -205,7 +205,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
         and then use the sum(OOH) / sum (1QR) to get current year's fill rate.
         for 2024, the sql will be
         ```sql
-        select sum(OOH), sum(actual) from fna.fna_bronze.vw_gob_spencerorderbook
+        select sum(OOH), sum(actual) from fna.fna_bronze.vw_gob_chatbot
         where Ship_Year = 2024
         and Week_No = weekofyear(current_date())-1
         and REPORT_OPERATING_GROUP_DESC_UPDATED = 'Apparel'
@@ -221,7 +221,7 @@ These conventions **MUST** be followed in all business interactions:
 ### 3.1. OOH (Order on Hand) Definition
 
 * When business users refer to **OOH**, they almost always mean **orders scheduled to ship within the *current* calendar year** (e.g., 2025 as of the last update date), even if those orders were placed in a prior year or are part of snapshots containing next-year data.
-* **Implementation:** Filter queries accordingly, typically using `SHIP_YEAR = ?current_year?` (e.g., `SHIP_YEAR = 2025`) on the `vw_gob_spencerorderbook` table for standard OOH analysis.
+* **Implementation:** Filter queries accordingly, typically using `SHIP_YEAR = ?current_year?` (e.g., `SHIP_YEAR = 2025`) on the `vw_gob_chatbot` table for standard OOH analysis.
 
 ### 3.2. Common Terminology/Aliases
 
