@@ -304,6 +304,13 @@ Commonly requested customer codes are:
 
 **Example SQL clause snippet:**  
 
+``` sql
+WHERE REPORT_CORPORATE_CUSTOMER_CODE IN ('KOHL', 'ACTD', ...)
+```
+
+
+Use this mapping to dynamically generate the appropriate SQL filter based on the customer requested by the user.
+
 ------
 
 **Knowledge Document: Understanding the Orderbook Report**
