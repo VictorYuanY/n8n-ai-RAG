@@ -279,7 +279,7 @@ USE:
 
 
 ```sql
-WoW = COALESCE(SUM(WoW),0)
+COALESCE(SUM(WoW),0)
 Please make sure to always include COALESCE when selecting WoW or YoY number.
 ```
 
