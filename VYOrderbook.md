@@ -283,6 +283,27 @@ COALESCE(SUM(WoW),0)
 Please make sure to always include COALESCE when selecting WoW or YoY number.
 ```
 
+* **5.2** **Customer Information :**
+
+When a user requests data for a specific customer, include the condition `REPORT_CORPORATE_CUSTOMER_CODE` in the SQL clause to filter by that customer's code.
+
+Commonly requested customer codes are:
+
+| Customer Name    | Customer Code(s)           |
+|------------------|----------------------------|
+| Kohl's           | KOHL                       |
+| Action           | ACTD                       |
+| ASDA             | ASDA                       |
+| American Eagle (AEO) | AEOI                    |
+| Chico's          | CHIR                       |
+| CVS              | CVSZ                       |
+| Premium Brands   | PREO                       |
+| Ross             | ROSE, ROSP, ROSS           |
+| Talbots          | TLBS                       |
+| Walmart          | WLMT                       |
+
+**Example SQL clause snippet:**  
+
 ------
 
 **Knowledge Document: Understanding the Orderbook Report**
