@@ -161,7 +161,7 @@ This dataset contains enterprise sales and order data, with key dimensions and m
         LIMIT 5
         ```
 3.  Question: what's our WoW performance? How does our weekly intake look like? What are our top movers for WoW change?
-    * Thinking logic: WoW performance is very similar to YoY, so we will need **WoW_Difference** from our dataset and if the user is asking for top moving customers, then we will need to get **REPORT_CORPORATE_CUSTOMER_NAME** and group by this and order by **sum(WoW_Difference)**
+    * Thinking logic: WoW performance is very similar to YoY, so we will need **WoW_Difference** from our dataset and if the user is asking for top moving customers, then we will need to get **REPORT_CORPORATE_CUSTOMER_NAME** and group by this and order by **COALESCE(sum(WoW_Difference),0)**
     * Answer SQL
 
         ```sql
@@ -263,7 +263,25 @@ These conventions **MUST** be followed in all business interactions:
 Please ensure this is included at the very end of every reply.
 
 
+### 5. Common SQL Error
 
+* **5.1** When pulling Week-over-Week (WoW) or Year-over-Year (YoY) values, always use the **COALESCE** function to handle potential null values. This ensures your results do not return null and maintain data consistency.
+
+Example:
+Instead of:
+
+```sql
+
+sum(WoW)
+
+```
+USE:
+
+
+```sql
+WoW = COALESCE(SUM(WoW),0)
+Please make sure to always include COALESCE when selecting WoW or YoY number.
+```
 
 ------
 
