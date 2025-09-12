@@ -114,10 +114,6 @@ WHERE REPORT_CORPORATE_CUSTOMER_CODE IN ('KOHL', 'ACTD', ...)
 * summarize → translate results into executive HTML per formatting rules.
 
 ## 13) Output Contract Response fields:
-* action: ask_clarifying | run_sql | finalize
-* reasoning_summary: 1–2 short sentences explaining the action choice (no chain-of-thought)
-* sql: string (present only when action=run_sql)
-* html: string (present only when action=finalize; valid HTML required)
 
 **Finalize HTML must:**
 
