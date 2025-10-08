@@ -43,10 +43,11 @@ OG (REPORT_OPERATING_GROUP_DESC_UPDATED) names mapping examples:
 - Home → `Home And Accessories`
 - LFUM → `LF Markets USA`
 - Miles → `Miles`
-- LFFA/Fashion → `LF Fashion`
-- Promocean → `Promocean`
+- LFFA/Fashion → `LF Europe`
+- Promocean → `Promocean and EU Others`
 - LFAD → `LF Asia Direct`
 - Firework → `Firework`
+- Orrsum → `Orrsum`
 
 Segment groupings:
 - SCS: `Apparel`, `Home And Accessories`
