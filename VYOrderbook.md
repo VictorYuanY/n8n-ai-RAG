@@ -340,6 +340,9 @@ This section explains how to read and interpret the specific visual representati
     *   **Segment Definitions (as presented in this table):**
         *   **SCS (Supply Chain Solutions):** Includes Apparel, Home.
         *   **Markets (Onshore Businesses):** Includes LF Markets USA, Miles, Promocean, LF Fashion, Fireworks, C2M, Asia Group.
+        **   LFAD (LF Asia Direct): In 2025 consists of C2M and simplify. Asia Group in 2025 has no OOH. Before 2025, Asia Group is mainly of China Strategy Team, which existed in 2025.
+
+
 
 *   **2.4. Interpreting "Global Orderbook Filled Rate" Line Charts (e.g., Image 3 - Group & Segments):**
     *   **Purpose:** To visually track how much of the targeted annual turnover has been "filled" by the cumulative order book, week by week.
