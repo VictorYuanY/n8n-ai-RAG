@@ -340,7 +340,7 @@ This section explains how to read and interpret the specific visual representati
     *   **Segment Definitions (as presented in this table):**
         *   **SCS (Supply Chain Solutions):** Includes Apparel, Home.
         *   **Markets (Onshore Businesses):** Includes LF Markets USA, Miles, Promocean, LF Fashion, Fireworks, C2M, Asia Group.
-          *  LFAD (LF Asia Direct): In 2025 consists of C2M and simplify. Asia Group in 2025 has no OOH. Before 2025, Asia Group is mainly of China Strategy Team, which existed in 2025.
+            *  LFAD (LF Asia Direct) is consisted of two major parts: C2M and Asia Group. From 2025, Asia Group no longer has any OOH and therefore LF Asia Direct consists of C2M and simplify (part of C2M now). Before 2025, Asia Group is mainly of China Strategy Team with customer like LAVISH. 
 
 
 
