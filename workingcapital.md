@@ -8,6 +8,12 @@ The main dataset is:
 fna.fna_bronze.working_capital_metrics
 ```
 
+The materialized view SQL is maintained separately in:
+
+```text
+C:\Users\VictorYuan\OneDrive - Li & Fung\Victor Analysis\2026 Project\Working Capital Project\working_capital_metrics.txt
+```
+
 It is designed as a Tableau-friendly long table. Each row is one metric value for one period, one operating group, one working capital part, and one month selection.
 
 ## 1. Purpose
@@ -697,7 +703,237 @@ ORDER BY
   month_sort;
 ```
 
-## 22. How To Ask Questions Against This Dataset
+## 22. Runnable Databricks SQL Templates
+
+These SQL templates can be copied into a Databricks SQL editor or passed to the local Databricks query tool.
+
+Local tool pattern:
+
+```powershell
+python C:\Users\VictorYuan\Opencode\BD_Chatbot_prompt\run_db.py "<SQL HERE>"
+```
+
+### Dashboard KPI Cards
+
+Use this for the top KPI cards: Total WC, AR, AP, Inventory, DSO, DPO, and DIO.
+
+```sql
+SELECT
+  wc_part,
+  unit,
+  value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period = '2026 Actual'
+  AND og = 'Total OG'
+  AND month = 'Year End'
+  AND wc_part IN ('Total WC', 'AR', 'AP', 'Inventory', 'DSO', 'DPO', 'DIO')
+ORDER BY
+  CASE wc_part
+    WHEN 'Total WC' THEN 1
+    WHEN 'AR' THEN 2
+    WHEN 'AP' THEN 3
+    WHEN 'Inventory' THEN 4
+    WHEN 'DSO' THEN 5
+    WHEN 'DPO' THEN 6
+    WHEN 'DIO' THEN 7
+  END;
+```
+
+### Total WC Trend: Actual vs Plan
+
+Use this for the line chart showing Actual vs Budget / 1QR / 2QR.
+
+```sql
+SELECT
+  period,
+  month,
+  month_sort,
+  value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period IN ('2026 Actual', '2026 Budget', '2026 1QR', '2026 2QR')
+  AND og = 'Total OG'
+  AND wc_part = 'Total WC'
+  AND month_sort <= 12
+ORDER BY
+  CASE period
+    WHEN '2026 Actual' THEN 1
+    WHEN '2026 Budget' THEN 2
+    WHEN '2026 1QR' THEN 3
+    WHEN '2026 2QR' THEN 4
+  END,
+  month_sort;
+```
+
+### Total WC Trend With Future Actual Months as Null
+
+Use this version if a line chart should not drop to zero for future Actual months.
+
+```sql
+SELECT
+  period,
+  month,
+  month_sort,
+  CASE
+    WHEN period = concat(CAST(year(current_date()) AS STRING), ' Actual')
+      AND month_sort <= 12
+      AND month_sort > month(add_months(current_date(), -1))
+    THEN NULL
+    ELSE value
+  END AS value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period IN ('2026 Actual', '2026 Budget', '2026 1QR', '2026 2QR')
+  AND og = 'Total OG'
+  AND wc_part = 'Total WC'
+  AND month_sort <= 12
+ORDER BY
+  CASE period
+    WHEN '2026 Actual' THEN 1
+    WHEN '2026 Budget' THEN 2
+    WHEN '2026 1QR' THEN 3
+    WHEN '2026 2QR' THEN 4
+  END,
+  month_sort;
+```
+
+### Working Capital Composition
+
+Use this for the bar chart showing which WC parts drive Total WC.
+
+```sql
+SELECT
+  wc_part,
+  unit,
+  value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period = '2026 Actual'
+  AND og = 'Total OG'
+  AND month = 'Year End'
+  AND wc_part IN ('AR', 'AP', 'Inventory', 'Factoring', 'OROP', 'LF Credit')
+ORDER BY
+  CASE wc_part
+    WHEN 'AR' THEN 1
+    WHEN 'AP' THEN 2
+    WHEN 'Inventory' THEN 3
+    WHEN 'Factoring' THEN 4
+    WHEN 'OROP' THEN 5
+    WHEN 'LF Credit' THEN 6
+  END;
+```
+
+### Total WC by OG
+
+Use this for the bottom bar chart by operating group.
+
+```sql
+SELECT
+  og,
+  unit,
+  value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period = '2026 Actual'
+  AND wc_part = 'Total WC'
+  AND month = 'Year End'
+  AND og IN (
+    'Apparel',
+    'Home and Accessories',
+    'SCS',
+    'LFMU',
+    'LFFA',
+    'Miles',
+    'PromOcean',
+    'Orrsum',
+    'LFAD',
+    'Firework',
+    'Markets',
+    'Total OG'
+  )
+ORDER BY
+  CASE og
+    WHEN 'Apparel' THEN 1
+    WHEN 'Home and Accessories' THEN 2
+    WHEN 'SCS' THEN 3
+    WHEN 'LFMU' THEN 4
+    WHEN 'LFFA' THEN 5
+    WHEN 'Miles' THEN 6
+    WHEN 'PromOcean' THEN 7
+    WHEN 'Orrsum' THEN 8
+    WHEN 'LFAD' THEN 9
+    WHEN 'Firework' THEN 10
+    WHEN 'Markets' THEN 11
+    WHEN 'Total OG' THEN 12
+  END;
+```
+
+### DSO, DPO, and DIO Trend
+
+Use this for the efficiency trend chart.
+
+```sql
+SELECT
+  wc_part,
+  month,
+  month_sort,
+  value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period = '2026 Actual'
+  AND og = 'Total OG'
+  AND wc_part IN ('DSO', 'DPO', 'DIO')
+  AND month_sort <= 12
+ORDER BY
+  CASE wc_part
+    WHEN 'DSO' THEN 1
+    WHEN 'DPO' THEN 2
+    WHEN 'DIO' THEN 3
+  END,
+  month_sort;
+```
+
+### One Business Question
+
+Use this pattern for a one-number answer.
+
+```sql
+SELECT
+  period,
+  og,
+  wc_part,
+  unit,
+  month,
+  value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period = '2026 Actual'
+  AND og = 'Apparel'
+  AND wc_part = 'Total WC'
+  AND month = 'Mar';
+```
+
+### Detail View for One OG and Month
+
+Use this to explain what is inside Total WC for one OG/month.
+
+```sql
+SELECT
+  wc_part,
+  unit,
+  value
+FROM fna.fna_bronze.working_capital_metrics
+WHERE period = '2026 Actual'
+  AND og = 'Apparel'
+  AND month = 'Mar'
+  AND wc_part IN ('AR', 'AP', 'Inventory', 'Factoring', 'OROP', 'LF Credit', 'Total WC')
+ORDER BY
+  CASE wc_part
+    WHEN 'AR' THEN 1
+    WHEN 'AP' THEN 2
+    WHEN 'Inventory' THEN 3
+    WHEN 'Factoring' THEN 4
+    WHEN 'OROP' THEN 5
+    WHEN 'LF Credit' THEN 6
+    WHEN 'Total WC' THEN 7
+  END;
+```
+
+## 23. How To Ask Questions Against This Dataset
 
 When asking for a SQL query, include:
 
@@ -727,7 +963,7 @@ Compare Total OG Total WC Actual vs Budget vs 1QR vs 2QR by month.
 Give me LFMU DSO, DPO, and DIO trend for 2026 Actual.
 ```
 
-## 23. Caveats
+## 24. Caveats
 
 - `Total WC` uses signed Jedox values.
 - DSO/DPO/DIO use sequence tables as the source of truth, not simple manual division.
@@ -736,4 +972,3 @@ Give me LFMU DSO, DPO, and DIO trend for 2026 Actual.
 - For Actual DIO, the balance is Actual but the future consumption buckets are Budget.
 - `Average` for current-year Actual uses months from Jan through the current calendar month.
 - `Year End` for current-year Actual uses the latest closed month.
-
